@@ -1,0 +1,35 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © aashishtamsya
+
+//@version=5
+indicator("All-in-One CPR [Aashish Tamsya]", overlay = true)
+
+resolution = input.string("D", "Resolution", ["15", "D", "W", "M"], group = "Resolution")
+
+D = time(resolution)
+D_con = na(D[1]) or D > D[1]
+D_check = D_con ? 1 : 2
+D_start = ta.valuewhen(D_check == 1, bar_index, 0)
+D_length = (bar_index - D_start) + 1
+D_lower = ta.lowest(D_length)
+D_upper = ta.highest(D_length)
+D_close = close
+
+//Developing Pivot Range calculation
+D_p = (D_upper + D_lower + D_close)/3 // pivot
+D_bc = (D_upper + D_lower) /2 // bottom
+D_tc = D_p + (D_p - D_bc) // top
+
+CPR_show = input.bool(true, "Show CPR", group = "CPR")
+pivot = (high + low + close ) / 3
+bc = (high + low ) / 2
+tc = (pivot - bc) + pivot
+
+// Pivot Range 
+dtime_pivot = request.security(syminfo.tickerid, resolution, pivot[1],  lookahead=barmerge.lookahead_on) 
+dtime_bc = request.security(syminfo.tickerid, resolution, bc[1], lookahead=barmerge.lookahead_on) 
+dtime_tc = request.security(syminfo.tickerid, resolution, tc[1], lookahead=barmerge.lookahead_on) 
+
+plot(CPR_show ? dtime_pivot : na, title="Daily Pivot", style=plot.style_circles, color=color.blue,linewidth=2) 
+plot(CPR_show ? dtime_bc : na, title="Daily BC",style=plot.style_circles, color=color.blue,linewidth=2)
+plot(CPR_show ? dtime_tc : na, title="Daily TC",style=plot.style_circles, color=color.blue,linewidth=2)
